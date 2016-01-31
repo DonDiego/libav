@@ -18,8 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "stdint.h"
+#include <stdint.h>
+
+#include "libavutil/attributes.h"
+#include "libavutil/avassert.h"
+
 #include "cfhd.h"
+
+#define NB_VLC_TABLE_9   (71 + 3)
+#define NB_VLC_TABLE_18 (263 + 1)
 
 static const uint8_t table_9_vlc_len[NB_VLC_TABLE_9] = {
      1,    2,    4,    5,    5,    5,    6,    6,
