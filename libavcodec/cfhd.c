@@ -158,7 +158,9 @@ static int alloc_buffers(AVCodecContext *avctx)
         return ret;
     avctx->pix_fmt = s->coded_format;
 
-    avcodec_get_chroma_sub_sample(avctx->pix_fmt, &s->chroma_x_shift, &s->chroma_y_shift);
+    if ((ret = av_pix_fmt_get_chroma_sub_sample(avctx->pix_fmt, &s->chroma_x_shift,
+                                                &s->chroma_y_shift)) < 0)
+        return ret;
     planes = av_pix_fmt_count_planes(avctx->pix_fmt);
 
     for (i = 0; i < planes; i++) {
@@ -499,7 +501,9 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
 
             av_log(avctx, AV_LOG_DEBUG, "Start subband coeffs plane %i level %i codebook %i expected %i\n", s->channel_num, s->level, s->codebook, expected);
 
-            init_get_bits(&s->gb, gb.buffer, bytestream2_get_bytes_left(&gb) * 8);
+            if ((ret = init_get_bits(&s->gb, gb->buffer,
+                                     bytestream2_get_bytes_left(gb) * 8)) < 0)
+                return ret;
             {
                 OPEN_READER(re, &s->gb);
                 if (!s->codebook) {
