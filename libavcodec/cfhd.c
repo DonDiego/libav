@@ -20,7 +20,7 @@
 
 /**
  * @file
- * CFHD Video Decoder
+ * Cineform HD video decoder
  */
 
 #include "libavutil/attributes.h"
@@ -261,7 +261,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
             av_log(avctx, AV_LOG_DEBUG, "Bits per component: %"PRIu16"\n", data);
             s->bpc = data;
         } else if (tag == 12) {
-            av_log(avctx, AV_LOG_DEBUG, "Channel Count: %"PRIu16"\n", data);
+            av_log(avctx, AV_LOG_DEBUG, "Channel count: %"PRIu16"\n", data);
             s->channel_cnt = data;
             if (data > 4) {
                 avpriv_report_missing_feature(avctx, "Channel count %"PRIu16, data);
@@ -269,7 +269,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
                 break;
             }
         } else if (tag == 14) {
-            av_log(avctx, AV_LOG_DEBUG, "Subband Count: %"PRIu16"\n", data);
+            av_log(avctx, AV_LOG_DEBUG, "Subband count: %"PRIu16"\n", data);
             if (data != SUBBAND_COUNT) {
                 avpriv_report_missing_feature(avctx, "Subband count %"PRIu16, data);
                 ret = AVERROR_PATCHWELCOME;
@@ -355,7 +355,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
                    "tag=2 header - skipping %"PRIu16" tag/value pairs\n", data);
             if (data > bytestream2_get_bytes_left(&gb) / 4) {
                 av_log(avctx, AV_LOG_ERROR,
-                       "too many tag/value pairs (%"PRIu16")\n", data);
+                       "Too many tag/value pairs (%"PRIu16")\n", data);
                 ret = AVERROR_INVALIDDATA;
                 break;
             }
@@ -483,7 +483,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
             /* Align to mod-4 position to continue reading tags */
             bytestream2_seek(gb, bytestream2_tell(gb) & 3, SEEK_CUR);
 
-            /* Copy last line of coefficients if odd height */
+            /* Copy last coefficient line if height is odd. */
             if (lowpass_height & 1) {
                 memcpy(&coeff_data[lowpass_height * lowpass_width],
                        &coeff_data[(lowpass_height - 1) * lowpass_width],
@@ -505,7 +505,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
             int count = 0, bytes;
 
             if (highpass_height > highpass_a_height || highpass_width > highpass_a_width || a_expected < expected) {
-                av_log(avctx, AV_LOG_ERROR, "Too many highpass coefficents\n");
+                av_log(avctx, AV_LOG_ERROR, "Too many highpass coefficients\n");
                 ret = AVERROR(EINVAL);
                 goto end;
             }
@@ -576,7 +576,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
             av_log(avctx, AV_LOG_DEBUG, "End subband coeffs %i extra %i\n", count, count - expected);
             s->codebook = 0;
 
-            /* Copy last line of coefficients if odd height */
+            /* Copy last coefficient line if height is odd. */
             if (highpass_height & 1) {
                 memcpy(&coeff_data[highpass_height * highpass_stride],
                        &coeff_data[(highpass_height - 1) * highpass_stride],
