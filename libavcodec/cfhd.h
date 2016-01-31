@@ -39,7 +39,7 @@ typedef struct CFHD_RL_VLC_ELEM {
 typedef struct SubBand {
     int level;
     int orientation;
-    int stride;
+    ptrdiff_t stride;
     int a_width;
     int width;
     int a_height;
