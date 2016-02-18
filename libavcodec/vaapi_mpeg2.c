@@ -20,6 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "bitstream.h"
 #include "hwaccel.h"
 #include "mpegutils.h"
 #include "mpegvideo.h"
@@ -133,22 +134,22 @@ static int vaapi_mpeg2_decode_slice(AVCodecContext *avctx, const uint8_t *buffer
     const MpegEncContext *s = avctx->priv_data;
     VAAPIDecodePicture *pic = s->current_picture_ptr->hwaccel_picture_private;
     VASliceParameterBufferMPEG2 slice_param;
-    GetBitContext gb;
+    BitstreamContext bc;
     uint32_t quantiser_scale_code, intra_slice_flag, macroblock_offset;
     int err;
 
     /* Determine macroblock_offset */
-    init_get_bits(&gb, buffer, 8 * size);
-    if (get_bits_long(&gb, 32) >> 8 != 1) /* start code */
+    bitstream_init8(&bc, buffer, size);
+    if (bitstream_read(&bc, 32) >> 8 != 1) /* start code */
         return AVERROR_INVALIDDATA;
-    quantiser_scale_code = get_bits(&gb, 5);
-    intra_slice_flag = get_bits1(&gb);
+    quantiser_scale_code = bitstream_read(&bc, 5);
+    intra_slice_flag = bitstream_read_bit(&bc);
     if (intra_slice_flag) {
-        skip_bits(&gb, 8);
-        while (get_bits1(&gb) != 0)
-            skip_bits(&gb, 8);
+        bitstream_skip(&bc, 8);
+        while (bitstream_read_bit(&bc) != 0)
+            bitstream_skip(&bc, 8);
     }
-    macroblock_offset = get_bits_count(&gb);
+    macroblock_offset = bitstream_tell(&bc);
 
     slice_param = (VASliceParameterBufferMPEG2) {
         .slice_data_size            = size,
