@@ -26,7 +26,8 @@
 #include "avcodec.h"
 #include "get_bits.h"
 
-#define VLC_BITS 9
+#define VLC_BITS       9
+#define SUBBAND_COUNT 10
 
 typedef struct CFHD_RL_VLC_ELEM {
     int16_t level;
@@ -58,7 +59,7 @@ typedef struct Plane {
     int16_t *idwt_tmp;
 
     /* TODO: merge this into SubBand structure */
-    int16_t *subband[10];
+    int16_t *subband[SUBBAND_COUNT];
     int16_t *l_h[8];
 
     SubBand band[DWT_LEVELS][4];

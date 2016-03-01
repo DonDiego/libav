@@ -36,7 +36,20 @@
 #include "thread.h"
 #include "cfhd.h"
 
-#define SUBBAND_COUNT 10
+enum CFHDParam {
+    ChannelCount     =  12,
+    SubbandCount     =  14,
+    ImageWidth       =  20,
+    ImageHeight      =  21,
+    LowpassPrecision =  35,
+    SubbandNumber    =  48,
+    Quantization     =  53,
+    ChannelNumber    =  62,
+    BitsPerComponent = 101,
+    ChannelWidth     = 104,
+    ChannelHeight    = 105,
+    PrescaleShift    = 109,
+};
 
 static av_cold int cfhd_init(AVCodecContext *avctx)
 {
@@ -63,7 +76,7 @@ static void init_frame_defaults(CFHDContext *s)
     s->coded_height      = 0;
     s->bpc               = 10;
     s->channel_cnt       = 4;
-    s->subband_cnt       = 10;
+    s->subband_cnt       = SUBBAND_COUNT;
     s->channel_num       = 0;
     s->lowpass_precision = 16;
     s->quantisation      = 1;
@@ -148,7 +161,7 @@ static void free_buffers(AVCodecContext *avctx)
     CFHDContext *s = avctx->priv_data;
     int i;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < FF_ARRAY_ELEMS(s->plane); i++) {
         av_freep(&s->plane[i].idwt_buf);
         av_freep(&s->plane[i].idwt_tmp);
     }
@@ -207,7 +220,7 @@ static int alloc_buffers(AVCodecContext *avctx)
         s->plane[i].subband[9] = s->plane[i].idwt_buf + 3 * w2 * h2;
 
         for (j = 0; j < DWT_LEVELS; j++) {
-            for (k = 0; k < 4; k++) {
+            for (k = 0; k < FF_ARRAY_ELEMS(s->plane[i].band[j]); k++) {
                 s->plane[i].band[j][k].a_width  = w8 << j;
                 s->plane[i].band[j][k].a_height = h8 << j;
             }
@@ -263,7 +276,7 @@ static int parse_tag(AVCodecContext *avctx, CFHDContext *s, GetByteContext *gb,
         }
         av_log(avctx, AV_LOG_DEBUG, "Transform-type? %"PRIu16"\n", data);
         break;
-    case 12:
+    case ChannelCount:
         av_log(avctx, AV_LOG_DEBUG, "Channel count: %"PRIu16"\n", data);
         s->channel_cnt = data;
         if (data > 4) {
@@ -271,18 +284,18 @@ static int parse_tag(AVCodecContext *avctx, CFHDContext *s, GetByteContext *gb,
             return AVERROR_PATCHWELCOME;
         }
         break;
-    case 14:
+    case SubbandCount:
         av_log(avctx, AV_LOG_DEBUG, "Subband count: %"PRIu16"\n", data);
         if (data != SUBBAND_COUNT) {
             avpriv_report_missing_feature(avctx, "Subband count %"PRIu16, data);
             return AVERROR_PATCHWELCOME;
         }
         break;
-    case 20:
+    case ImageWidth:
         av_log(avctx, AV_LOG_DEBUG, "Width %"PRIu16"\n", data);
         s->coded_width = data;
         break;
-    case 21:
+    case ImageHeight:
         av_log(avctx, AV_LOG_DEBUG, "Height %"PRIu16"\n", data);
         s->coded_height = data;
         break;
@@ -306,7 +319,7 @@ static int parse_tag(AVCodecContext *avctx, CFHDContext *s, GetByteContext *gb,
             return AVERROR(EINVAL);
         }
         break;
-    case 35:
+    case LowpassPrecision:
         av_log(avctx, AV_LOG_DEBUG, "Lowpass precision bits: %"PRIu16"\n", data);
         break;
     case 41:
@@ -328,7 +341,7 @@ static int parse_tag(AVCodecContext *avctx, CFHDContext *s, GetByteContext *gb,
             return AVERROR(EINVAL);
         }
         break;
-    case 48:
+    case SubbandNumber:
         if (s->subband_num != 0 && data == 1)  // hack
             s->level++;
         av_log(avctx, AV_LOG_DEBUG, "Subband number %"PRIu16"\n", data);
@@ -362,16 +375,16 @@ static int parse_tag(AVCodecContext *avctx, CFHDContext *s, GetByteContext *gb,
     case 51:
         av_log(avctx, AV_LOG_DEBUG, "Subband number actual %"PRIu16"\n", data);
         s->subband_num_actual = data;
-        if (s->subband_num_actual >= 10) {
+        if (s->subband_num_actual >= SUBBAND_COUNT) {
             av_log(avctx, AV_LOG_ERROR, "Invalid subband number actual\n");
             return AVERROR(EINVAL);
         }
         break;
-    case 53:
+    case Quantization:
         s->quantisation = data;
         av_log(avctx, AV_LOG_DEBUG, "Quantisation: %"PRIu16"\n", data);
         break;
-    case 62:
+    case ChannelNumber:
         s->channel_num = data;
         av_log(avctx, AV_LOG_DEBUG, "Channel number %"PRIu16"\n", data);
         if (s->channel_num >= *planes) {
@@ -415,7 +428,7 @@ static int parse_tag(AVCodecContext *avctx, CFHDContext *s, GetByteContext *gb,
         av_log(avctx, AV_LOG_DEBUG, "Bits per component: %"PRIu16"\n", data);
         s->bpc = data;
         break;
-    case 109:
+    case PrescaleShift:
         s->prescale_shift[0] = (data >> 0) & 0x7;
         s->prescale_shift[1] = (data >> 3) & 0x7;
         s->prescale_shift[2] = (data >> 6) & 0x7;
