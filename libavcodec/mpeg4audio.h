@@ -26,7 +26,7 @@
 
 #include "libavutil/attributes.h"
 
-#include "get_bits.h"
+#include "bitstream.h"
 #include "put_bits.h"
 
 typedef struct MPEG4AudioConfig {
@@ -109,41 +109,41 @@ enum AudioObjectType {
                          ///<marker and the comment
 
 static av_always_inline unsigned int ff_pce_copy_bits(PutBitContext *pb,
-                                                      GetBitContext *gb,
+                                                      BitstreamContext *bc,
                                                       int bits)
 {
-    unsigned int el = get_bits(gb, bits);
+    unsigned int el = bitstream_read(bc, bits);
     put_bits(pb, bits, el);
     return el;
 }
 
-static inline int ff_copy_pce_data(PutBitContext *pb, GetBitContext *gb)
+static inline int ff_copy_pce_data(PutBitContext *pb, BitstreamContext *bc)
 {
     int five_bit_ch, four_bit_ch, comment_size, bits;
     int offset = put_bits_count(pb);
 
-    ff_pce_copy_bits(pb, gb, 10);               // Tag, Object Type, Frequency
-    five_bit_ch  = ff_pce_copy_bits(pb, gb, 4); // Front
-    five_bit_ch += ff_pce_copy_bits(pb, gb, 4); // Side
-    five_bit_ch += ff_pce_copy_bits(pb, gb, 4); // Back
-    four_bit_ch  = ff_pce_copy_bits(pb, gb, 2); // LFE
-    four_bit_ch += ff_pce_copy_bits(pb, gb, 3); // Data
-    five_bit_ch += ff_pce_copy_bits(pb, gb, 4); // Coupling
-    if (ff_pce_copy_bits(pb, gb, 1))            // Mono Mixdown
-        ff_pce_copy_bits(pb, gb, 4);
-    if (ff_pce_copy_bits(pb, gb, 1))            // Stereo Mixdown
-        ff_pce_copy_bits(pb, gb, 4);
-    if (ff_pce_copy_bits(pb, gb, 1))            // Matrix Mixdown
-        ff_pce_copy_bits(pb, gb, 3);
+    ff_pce_copy_bits(pb, bc, 10);               // Tag, Object Type, Frequency
+    five_bit_ch  = ff_pce_copy_bits(pb, bc, 4); // Front
+    five_bit_ch += ff_pce_copy_bits(pb, bc, 4); // Side
+    five_bit_ch += ff_pce_copy_bits(pb, bc, 4); // Back
+    four_bit_ch  = ff_pce_copy_bits(pb, bc, 2); // LFE
+    four_bit_ch += ff_pce_copy_bits(pb, bc, 3); // Data
+    five_bit_ch += ff_pce_copy_bits(pb, bc, 4); // Coupling
+    if (ff_pce_copy_bits(pb, bc, 1))            // Mono Mixdown
+        ff_pce_copy_bits(pb, bc, 4);
+    if (ff_pce_copy_bits(pb, bc, 1))            // Stereo Mixdown
+        ff_pce_copy_bits(pb, bc, 4);
+    if (ff_pce_copy_bits(pb, bc, 1))            // Matrix Mixdown
+        ff_pce_copy_bits(pb, bc, 3);
     for (bits = five_bit_ch*5+four_bit_ch*4; bits > 16; bits -= 16)
-        ff_pce_copy_bits(pb, gb, 16);
+        ff_pce_copy_bits(pb, bc, 16);
     if (bits)
-        ff_pce_copy_bits(pb, gb, bits);
+        ff_pce_copy_bits(pb, bc, bits);
     avpriv_align_put_bits(pb);
-    align_get_bits(gb);
-    comment_size = ff_pce_copy_bits(pb, gb, 8);
+    bitstream_align(bc);
+    comment_size = ff_pce_copy_bits(pb, bc, 8);
     for (; comment_size > 0; comment_size--)
-        ff_pce_copy_bits(pb, gb, 8);
+        ff_pce_copy_bits(pb, bc, 8);
 
     return put_bits_count(pb) - offset;
 }

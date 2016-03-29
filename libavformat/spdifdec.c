@@ -29,6 +29,7 @@
 
 #include "libavcodec/ac3.h"
 #include "libavcodec/adts_parser.h"
+#include "libavcodec/bitstream.h"
 
 #include "avformat.h"
 #include "spdif.h"

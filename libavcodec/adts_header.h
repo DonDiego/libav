@@ -23,7 +23,9 @@
 #ifndef AVCODEC_ADTS_HEADER_H
 #define AVCODEC_ADTS_HEADER_H
 
-#include "get_bits.h"
+#include <stdint.h>
+
+#include "bitstream.h"
 
 typedef struct AACADTSHeaderInfo {
     uint32_t sample_rate;
@@ -39,12 +41,12 @@ typedef struct AACADTSHeaderInfo {
 /**
  * Parse the ADTS frame header to the end of the variable header, which is
  * the first 54 bits.
- * @param[in]  gbc BitContext containing the first 54 bits of the frame.
+ * @param[in]  bc  BitstreamContext containing the first 54 bits of the frame.
  * @param[out] hdr Pointer to struct where header info is written.
  * @return Returns 0 on success, -1 if there is a sync word mismatch,
  * -2 if the version element is invalid, -3 if the sample rate
  * element is invalid, or -4 if the bit rate element is invalid.
  */
-int ff_adts_header_parse(GetBitContext *gbc, AACADTSHeaderInfo *hdr);
+int ff_adts_header_parse(BitstreamContext *bc, AACADTSHeaderInfo *hdr);
 
 #endif /* AVCODEC_ADTS_HEADER_H */
