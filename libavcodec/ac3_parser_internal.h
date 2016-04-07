@@ -22,7 +22,7 @@
 #define AVCODEC_AC3_PARSER_INTERNAL_H
 
 #include "ac3.h"
-#include "get_bits.h"
+#include "bitstream.h"
 
 /**
  * Parse AC-3 frame header.
@@ -34,6 +34,6 @@
  * -2 if the bsid (version) element is invalid, -3 if the fscod (sample rate)
  * element is invalid, or -4 if the frmsizecod (bit rate) element is invalid.
  */
-int ff_ac3_parse_header(GetBitContext *gbc, AC3HeaderInfo *hdr);
+int ff_ac3_parse_header(BitstreamContext *bc, AC3HeaderInfo *hdr);
 
 #endif /* AVCODEC_AC3_PARSER_INTERNAL_H */
