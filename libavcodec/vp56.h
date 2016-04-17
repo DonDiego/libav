@@ -27,11 +27,12 @@
 #define AVCODEC_VP56_H
 
 #include "avcodec.h"
-#include "get_bits.h"
+#include "bitstream.h"
 #include "hpeldsp.h"
 #include "bytestream.h"
 #include "h264chroma.h"
 #include "videodsp.h"
+#include "vlc.h"
 #include "vp3dsp.h"
 #include "vp56dsp.h"
 
@@ -195,7 +196,7 @@ struct vp56_context {
 
     /* huffman decoding */
     int use_huffman;
-    GetBitContext gb;
+    BitstreamContext bc;
     VLC dccv_vlc[2];
     VLC runv_vlc[2];
     VLC ract_vlc[2][3][6];
