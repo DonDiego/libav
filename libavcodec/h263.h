@@ -26,10 +26,11 @@
 
 #include "libavutil/rational.h"
 
-#include "get_bits.h"
+#include "bitstream.h"
 #include "mpegvideo.h"
 #include "h263data.h"
 #include "rl.h"
+#include "vlc.h"
 
 #define FF_ASPECT_EXTENDED 15
 #define INT_BIT (CHAR_BIT * sizeof(int))
