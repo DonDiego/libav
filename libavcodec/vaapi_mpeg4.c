@@ -20,6 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "bitstream.h"
 #include "h263.h"
 #include "hwaccel.h"
 #include "internal.h"
@@ -163,13 +164,13 @@ static int vaapi_mpeg4_decode_slice(AVCodecContext *avctx, const uint8_t *buffer
      * that we don't call vaapi_mpeg4_decode_slice() again
      */
     if (avctx->codec->id == AV_CODEC_ID_H263)
-        size = s->gb.buffer_end - buffer;
+        size = s->bc.buffer_end - buffer;
 
     slice_param = (VASliceParameterBufferMPEG4) {
         .slice_data_size   = size,
         .slice_data_offset = 0,
         .slice_data_flag   = VA_SLICE_DATA_FLAG_ALL,
-        .macroblock_offset = get_bits_count(&s->gb) % 8,
+        .macroblock_offset = bitstream_tell(&s->bc) % 8,
         .macroblock_number = s->mb_y * s->mb_width + s->mb_x,
         .quant_scale       = s->qscale,
     };
