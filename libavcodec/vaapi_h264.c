@@ -20,6 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "bitstream.h"
 #include "h264dec.h"
 #include "h264_ps.h"
 #include "hwaccel.h"
@@ -342,7 +343,7 @@ static int vaapi_h264_decode_slice(AVCodecContext *avctx,
         .slice_data_size               = size,
         .slice_data_offset             = 0,
         .slice_data_flag               = VA_SLICE_DATA_FLAG_ALL,
-        .slice_data_bit_offset         = get_bits_count(&sl->gb),
+        .slice_data_bit_offset         = bitstream_tell(&sl->bc),
         .first_mb_in_slice             = (sl->mb_y >> FIELD_OR_MBAFF_PICTURE(h)) * h->mb_width + sl->mb_x,
         .slice_type                    = ff_h264_get_slice_type(sl),
         .direct_spatial_mv_pred_flag   = sl->slice_type == AV_PICTURE_TYPE_B ? sl->direct_spatial_mv_pred : 0,

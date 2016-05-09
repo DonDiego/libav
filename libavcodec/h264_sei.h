@@ -19,7 +19,7 @@
 #ifndef AVCODEC_H264_SEI_H
 #define AVCODEC_H264_SEI_H
 
-#include "get_bits.h"
+#include "bitstream.h"
 
 /**
  * SEI message types
@@ -127,7 +127,7 @@ typedef struct H264SEIContext {
 
 struct H264ParamSets;
 
-int ff_h264_sei_decode(H264SEIContext *h, GetBitContext *gb,
+int ff_h264_sei_decode(H264SEIContext *h, BitstreamContext *bc,
                        const struct H264ParamSets *ps, void *logctx);
 
 /**
