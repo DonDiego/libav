@@ -32,7 +32,7 @@
 #include "avcodec.h"
 #include "bswapdsp.h"
 #include "cabac.h"
-#include "get_bits.h"
+#include "bitstream.h"
 #include "h2645_parse.h"
 #include "hevc.h"
 #include "hevc_ps.h"
@@ -413,7 +413,7 @@ typedef struct HEVCLocalContext {
 
     uint8_t first_qp_group;
 
-    GetBitContext gb;
+    BitstreamContext bc;
     CABACContext cc;
 
     int8_t qp_y;

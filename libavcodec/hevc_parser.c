@@ -22,7 +22,7 @@
 
 #include "libavutil/common.h"
 
-#include "golomb_legacy.h"
+#include "golomb.h"
 #include "hevc.h"
 #include "hevcdec.h"
 #include "h2645_parse.h"
@@ -45,18 +45,18 @@ static int hevc_parse_slice_header(AVCodecParserContext *s, H2645NAL *nal,
                                    AVCodecContext *avctx)
 {
     HEVCParserContext *ctx = s->priv_data;
-    GetBitContext *gb = &nal->gb;
+    BitstreamContext *bc = &nal->bc;
 
     HEVCPPS *pps;
     HEVCSPS *sps;
     HEVCWindow *ow;
     unsigned int pps_id;
 
-    get_bits1(gb);          // first slice in pic
+    bitstream_read_bit(bc);     // first slice in pic
     if (IS_IRAP_NAL(nal))
-        get_bits1(gb);      // no output of prior pics
+        bitstream_read_bit(bc); // no output of prior pics
 
-    pps_id = get_ue_golomb_long(gb);
+    pps_id = get_ue_golomb_long(bc);
     if (pps_id >= HEVC_MAX_PPS_COUNT || !ctx->ps.pps_list[pps_id]) {
         av_log(avctx, AV_LOG_ERROR, "PPS id out of range: %d\n", pps_id);
         return AVERROR_INVALIDDATA;
@@ -95,9 +95,9 @@ static int parse_nal_units(AVCodecParserContext *s, const uint8_t *buf,
 
         /* ignore everything except parameter sets and VCL NALUs */
         switch (nal->type) {
-        case HEVC_NAL_VPS: ff_hevc_decode_nal_vps(&nal->gb, avctx, &ctx->ps);    break;
-        case HEVC_NAL_SPS: ff_hevc_decode_nal_sps(&nal->gb, avctx, &ctx->ps, 1); break;
-        case HEVC_NAL_PPS: ff_hevc_decode_nal_pps(&nal->gb, avctx, &ctx->ps);    break;
+        case HEVC_NAL_VPS: ff_hevc_decode_nal_vps(&nal->bc, avctx, &ctx->ps);    break;
+        case HEVC_NAL_SPS: ff_hevc_decode_nal_sps(&nal->bc, avctx, &ctx->ps, 1); break;
+        case HEVC_NAL_PPS: ff_hevc_decode_nal_pps(&nal->bc, avctx, &ctx->ps);    break;
         case HEVC_NAL_TRAIL_R:
         case HEVC_NAL_TRAIL_N:
         case HEVC_NAL_TSA_N:
