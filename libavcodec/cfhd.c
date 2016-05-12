@@ -259,11 +259,11 @@ static int parse_tag(CFHDContext *s, GetByteContext *gb,
     *tag_ = tag;
     *value = data;
 
-    if (abs_tag8 >= 0x60 && abs_tag8 <= 0x6f) {
-        av_log(s->avctx, AV_LOG_DEBUG, "large len %"PRIx16"\n",
-               ((tagu & 0xff) << 16) | data);
+    if (abs_tag8 >= 0x60 && abs_tag8 <= 0x6F) {
+        av_log(s->avctx, AV_LOG_DEBUG, "large len %"PRIX16"\n",
+               ((tagu & 0xFF) << 16) | data);
         return 0;
-    } else if (abstag >= 0x4000 && abstag <= 0x40ff) {
+    } else if (abstag >= 0x4000 && abstag <= 0x40FF) {
         av_log(s->avctx, AV_LOG_DEBUG, "Small chunk length %"PRIu16" %s\n",
                data * 4, tag < 0 ? "optional" : "required");
         bytestream2_skipu(gb, data * 4);
@@ -287,7 +287,7 @@ static int parse_tag(CFHDContext *s, GetByteContext *gb,
         for (i = 0; i < data; i++) {
             uint16_t tag2 = bytestream2_get_be16(gb);
             uint16_t val2 = bytestream2_get_be16(gb);
-            av_log(s->avctx, AV_LOG_DEBUG, "Tag/Value = %"PRIx16" %"PRIx16"\n",
+            av_log(s->avctx, AV_LOG_DEBUG, "Tag/Value = %"PRIX16" %"PRIX16"\n",
                    tag2, val2);
         }
         break;
@@ -451,10 +451,10 @@ static int parse_tag(CFHDContext *s, GetByteContext *gb,
         s->prescale_shift[0] = (data >> 0) & 0x7;
         s->prescale_shift[1] = (data >> 3) & 0x7;
         s->prescale_shift[2] = (data >> 6) & 0x7;
-        av_log(s->avctx, AV_LOG_DEBUG, "Prescale shift (VC-5): %"PRIx16"\n", data);
+        av_log(s->avctx, AV_LOG_DEBUG, "Prescale shift (VC-5): %"PRIX16"\n", data);
         break;
     default:
-        av_log(s->avctx, AV_LOG_DEBUG, "Unknown tag %"PRIu16" data %"PRIx16"\n",
+        av_log(s->avctx, AV_LOG_DEBUG, "Unknown tag %"PRIu16" data %"PRIX16"\n",
                tag, data);
     }
 
@@ -681,7 +681,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
             return ret;
 
         /* Some kind of end of header tag */
-        if (tag == 4 && value == 0x1a4a)
+        if (tag == 4 && value == 0x1A4A)
             break;
     }
 
@@ -712,7 +712,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
 
         if (s->a_width && s->a_height) {
             int16_t *coeff_data = s->plane[s->channel_num].subband[s->subband_num_actual];
-            if (tag == 4 && value == 0xf0f) {
+            if (tag == 4 && value == 0x0F0F) {
                 if ((ret = read_lowpass_coeffs(s, &gb, coeff_data)) < 0)
                     return ret;
             } else if (tag == 55 && s->subband_num_actual != 255) {
