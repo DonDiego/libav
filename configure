@@ -296,9 +296,6 @@ Advanced options (experts only):
   --custom-allocator=NAME  use a supported custom allocator
   --disable-symver         disable symbol versioning
   --enable-hardcoded-tables use hardcoded tables instead of runtime generation
-  --disable-safe-bitstream-reader
-                           disable buffer boundary checking in bitreaders
-                           (faster, but may crash)
   --enable-sram            allow use of on-chip SRAM
 
 Optimization options (experts only):
@@ -1349,7 +1346,6 @@ FEATURE_LIST="
     hardcoded_tables
     omx_rpi
     runtime_cpudetect
-    safe_bitstream_reader
     shared
     small
     sram
@@ -2593,7 +2589,6 @@ enable debug
 enable doc
 enable faan faandct faanidct
 enable optimizations
-enable safe_bitstream_reader
 enable static
 enable swscale_alpha
 enable valgrind_backtrace
@@ -5284,7 +5279,6 @@ echo "static                    ${static-no}"
 echo "shared                    ${shared-no}"
 echo "network support           ${network-no}"
 echo "threading support         ${thread_type-no}"
-echo "safe bitstream reader     ${safe_bitstream_reader-no}"
 test -n "$random_seed" &&
     echo "random seed               ${random_seed}"
 echo
