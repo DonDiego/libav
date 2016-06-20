@@ -699,6 +699,11 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
         got_buffer = 1;
     }
 
+    if (!got_buffer) {
+        av_log(avctx, AV_LOG_ERROR, "No end of header tag found\n");
+        return AVERROR_INVALIDDATA;
+    }
+
     while (bytestream2_get_bytes_left(&gb) > 4) {
         if ((ret = parse_tag(avctx, s, &gb, &tag, &value, &planes)) < 0)
             return ret;
@@ -718,11 +723,6 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
     if (!s->a_width    || !s->a_height    || s->a_format     == AV_PIX_FMT_NONE ||
         s->coded_width || s->coded_height || s->coded_format != AV_PIX_FMT_NONE) {
         av_log(avctx, AV_LOG_ERROR, "Invalid dimensions\n");
-        return AVERROR_INVALIDDATA;
-    }
-
-    if (!got_buffer) {
-        av_log(avctx, AV_LOG_ERROR, "No end of header tag found\n");
         return AVERROR_INVALIDDATA;
     }
 
