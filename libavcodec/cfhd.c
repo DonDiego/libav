@@ -419,13 +419,17 @@ static int parse_tag(CFHDContext *s, GetByteContext *gb,
         break;
     case 84:
         av_log(s->avctx, AV_LOG_DEBUG, "Sample format? %"PRIu16"\n", data);
-        if (data == 1)
+        switch (data) {
+        case 1:
             s->coded_format = AV_PIX_FMT_YUV422P10;
-        else if (data == 3)
+            break;
+        case 3:
             s->coded_format = AV_PIX_FMT_GBRP12;
-        else if (data == 4)
+            break;
+        case 4:
             s->coded_format = AV_PIX_FMT_GBRAP12;
-        else {
+            break;
+        default:
             avpriv_report_missing_feature(s->avctx, "Sample format %"PRIu16, data);
             return AVERROR_PATCHWELCOME;
         }
