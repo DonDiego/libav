@@ -72,6 +72,7 @@ static void init_plane_defaults(CFHDContext *s)
 
 static void init_frame_defaults(CFHDContext *s)
 {
+    s->coded_format      = AV_PIX_FMT_YUV422P10;
     s->coded_width       = 0;
     s->coded_height      = 0;
     s->cropped_height    = 0;
@@ -670,7 +671,6 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
     int16_t tag;
     uint16_t value;
 
-    s->coded_format = AV_PIX_FMT_YUV422P10;
     init_frame_defaults(s);
     planes = av_pix_fmt_count_planes(s->coded_format);
 
