@@ -55,6 +55,8 @@ static av_cold int cfhd_init(AVCodecContext *avctx)
 {
     CFHDContext *s = avctx->priv_data;
 
+    memset(s, 0, sizeof(*s));
+
     s->avctx                   = avctx;
     avctx->bits_per_raw_sample = 10;
 
@@ -754,23 +756,22 @@ static av_cold int cfhd_close(AVCodecContext *avctx)
 
     free_buffers(s);
 
-    if (!avctx->internal->is_copy) {
-        ff_free_vlc(&s->vlc_9);
-        ff_free_vlc(&s->vlc_18);
-    }
+    ff_free_vlc(&s->vlc_9);
+    ff_free_vlc(&s->vlc_18);
 
     return 0;
 }
 
 AVCodec ff_cfhd_decoder = {
-    .name           = "cfhd",
-    .long_name      = NULL_IF_CONFIG_SMALL("Cineform HD"),
-    .type           = AVMEDIA_TYPE_VIDEO,
-    .id             = AV_CODEC_ID_CFHD,
-    .priv_data_size = sizeof(CFHDContext),
-    .init           = cfhd_init,
-    .close          = cfhd_close,
-    .decode         = cfhd_decode,
-    .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_FRAME_THREADS,
-    .caps_internal  = FF_CODEC_CAP_INIT_THREADSAFE | FF_CODEC_CAP_INIT_CLEANUP,
+    .name             = "cfhd",
+    .long_name        = NULL_IF_CONFIG_SMALL("Cineform HD"),
+    .type             = AVMEDIA_TYPE_VIDEO,
+    .id               = AV_CODEC_ID_CFHD,
+    .priv_data_size   = sizeof(CFHDContext),
+    .init             = cfhd_init,
+    .init_thread_copy = ONLY_IF_THREADS_ENABLED(cfhd_init),
+    .close            = cfhd_close,
+    .decode           = cfhd_decode,
+    .capabilities     = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_FRAME_THREADS,
+    .caps_internal    = FF_CODEC_CAP_INIT_THREADSAFE | FF_CODEC_CAP_INIT_CLEANUP,
 };
