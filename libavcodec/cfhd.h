@@ -76,9 +76,6 @@ typedef struct CFHDContext {
 
     GetBitContext gb;
 
-    int chroma_x_shift;
-    int chroma_y_shift;
-
     int coded_width;
     int coded_height;
     int cropped_height;

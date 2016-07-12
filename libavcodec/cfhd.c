@@ -170,6 +170,7 @@ static void free_buffers(CFHDContext *s)
 static int alloc_buffers(CFHDContext *s)
 {
     int i, j, ret, planes;
+    int chroma_x_shift, chroma_y_shift;
     unsigned k;
 
     if ((ret = ff_set_dimensions(s->avctx, s->coded_width, s->coded_height)) < 0)
@@ -180,15 +181,15 @@ static int alloc_buffers(CFHDContext *s)
     s->avctx->pix_fmt = s->coded_format;
 
     if ((ret = av_pix_fmt_get_chroma_sub_sample(s->coded_format,
-                                                &s->chroma_x_shift,
-                                                &s->chroma_y_shift)) < 0)
+                                                &chroma_x_shift,
+                                                &chroma_y_shift)) < 0)
         return ret;
     planes = av_pix_fmt_count_planes(s->coded_format);
 
     for (i = 0; i < planes; i++) {
         int w8, h8, w4, h4, w2, h2;
-        int width  = i ? s->coded_width  >> s->chroma_x_shift : s->coded_width;
-        int height = i ? s->coded_height >> s->chroma_y_shift : s->coded_height;
+        int width  = i ? s->coded_width  >> chroma_x_shift : s->coded_width;
+        int height = i ? s->coded_height >> chroma_y_shift : s->coded_height;
         ptrdiff_t stride = FFALIGN(width  / 8, 8) * 8;
         height           = FFALIGN(height / 8, 2) * 8;
         s->plane[i].width  = width;
