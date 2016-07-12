@@ -667,7 +667,7 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
     CFHDContext *s = avctx->priv_data;
     GetByteContext gb;
     ThreadFrame frame = { .f = data };
-    int ret = 0, planes, plane, got_buffer = 0;
+    int ret = 0, planes, plane;
     int16_t tag;
     uint16_t value;
 
@@ -685,29 +685,26 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
             break;
     }
 
-    if (s->coded_width && s->coded_height && s->coded_format != AV_PIX_FMT_NONE) {
-        if (s->a_width != s->coded_width || s->a_height != s->coded_height ||
-            s->a_format != s->coded_format) {
-            free_buffers(s);
-            if ((ret = alloc_buffers(s)) < 0) {
-                free_buffers(s);
-                return ret;
-            }
-        }
-
-        if ((ret = ff_thread_get_buffer(avctx, &frame, 0)) < 0)
-            return ret;
-
-        s->coded_width  = 0;
-        s->coded_height = 0;
-        s->coded_format = AV_PIX_FMT_NONE;
-        got_buffer = 1;
-    }
-
-    if (!got_buffer) {
-        av_log(avctx, AV_LOG_ERROR, "No end of header tag found\n");
+    if (s->coded_width <= 0 || s->coded_height <= 0 || s->coded_format == AV_PIX_FMT_NONE) {
+        av_log(avctx, AV_LOG_ERROR, "Video dimensions/format missing or invalid\n");
         return AVERROR_INVALIDDATA;
     }
+
+    if (s->a_width != s->coded_width || s->a_height != s->coded_height ||
+        s->a_format != s->coded_format) {
+        free_buffers(s);
+        if ((ret = alloc_buffers(s)) < 0) {
+            free_buffers(s);
+            return ret;
+        }
+    }
+
+    if ((ret = ff_thread_get_buffer(avctx, &frame, 0)) < 0)
+        return ret;
+
+    s->coded_width  = 0;
+    s->coded_height = 0;
+    s->coded_format = AV_PIX_FMT_NONE;
 
     while (bytestream2_get_bytes_left(&gb) > 4) {
         if ((ret = parse_tag(s, &gb, &tag, &value, &planes)) < 0)
