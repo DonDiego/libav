@@ -585,7 +585,7 @@ static int read_highpass_coeffs(CFHDContext *s, GetByteContext *gb,
     return 0;
 }
 
-static int reconstruct_level(CFHDContext *s, void *data, int plane, int level)
+static int reconstruct_level(CFHDContext *s, AVFrame *pic, int plane, int level)
 {
     int i, j, idx = level - 1, idx2 = level > 1 ? 1 : 0;
     int16_t *low, *high, *output, *dst;
@@ -649,7 +649,6 @@ static int reconstruct_level(CFHDContext *s, void *data, int plane, int level)
         }
     } else {
         int act_plane = plane == 1 ? 2 : plane == 2 ? 1 : plane;
-        AVFrame *pic = data;
         dst = (int16_t *)pic->data[act_plane];
         for (i = 0; i < lowpass_height * 2; i++) {
             horiz_filter_clip(dst, low, high, lowpass_width, s->bpc);
