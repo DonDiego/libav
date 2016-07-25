@@ -173,13 +173,6 @@ static int alloc_buffers(CFHDContext *s)
     int chroma_x_shift, chroma_y_shift;
     unsigned k;
 
-    if ((ret = ff_set_dimensions(s->avctx, s->coded_width, s->coded_height)) < 0)
-        return ret;
-    if (s->cropped_height)
-        s->avctx->height = s->cropped_height;
-
-    s->avctx->pix_fmt = s->coded_format;
-
     if ((ret = av_pix_fmt_get_chroma_sub_sample(s->coded_format,
                                                 &chroma_x_shift,
                                                 &chroma_y_shift)) < 0)
@@ -689,6 +682,14 @@ static int cfhd_decode(AVCodecContext *avctx, void *data, int *got_frame,
         av_log(avctx, AV_LOG_ERROR, "Video dimensions/format missing or invalid\n");
         return AVERROR_INVALIDDATA;
     }
+
+    ret = ff_set_dimensions(s->avctx, s->coded_width, s->coded_height);
+    if (ret < 0)
+        return ret;
+    if (s->cropped_height)
+        s->avctx->height = s->cropped_height;
+
+    s->avctx->pix_fmt = s->coded_format;
 
     if (s->a_width != s->coded_width || s->a_height != s->coded_height ||
         s->a_format != s->coded_format) {
