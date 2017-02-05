@@ -23,19 +23,20 @@
 #ifndef AVCODEC_AC3_PARSER_H
 #define AVCODEC_AC3_PARSER_H
 
+#include <stdint.h>
+
 #include "ac3.h"
-#include "bitstream.h"
 
 /**
  * Parse AC-3 frame header.
  * Parse the header up to the lfeon element, which is the first 52 or 54 bits
  * depending on the audio coding mode.
- * @param[in]  bc  BitContext containing the first 54 bits of the frame.
+ * @param[in]  buffer  buffer containing the first 54 bits of the frame.
+ * @param[in]  buffer_size size of the buffer
  * @param[out] hdr Pointer to struct where header info is written.
- * @return Returns 0 on success, -1 if there is a sync word mismatch,
- * -2 if the bsid (version) element is invalid, -3 if the fscod (sample rate)
- * element is invalid, or -4 if the frmsizecod (bit rate) element is invalid.
+ * @return Returns number of bits consumed or an AAC_AC3 parser
+ * error code on failure.
  */
-int avpriv_ac3_parse_header(BitstreamContext *bc, AC3HeaderInfo *hdr);
+int avpriv_ac3_parse_header(const uint8_t *buffer, size_t buffer_size, AC3HeaderInfo *hdr);
 
 #endif /* AVCODEC_AC3_PARSER_H */

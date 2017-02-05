@@ -270,11 +270,11 @@ static int ac3_parse_header(AC3DecodeContext *s)
 static int parse_frame_header(AC3DecodeContext *s)
 {
     AC3HeaderInfo hdr;
-    int err;
-
-    err = avpriv_ac3_parse_header(&s->bc, &hdr);
-    if (err)
+    int err = avpriv_ac3_parse_header(s->bc.buffer, s->bc.bits_left, &hdr);
+    if (err < 0)
         return err;
+
+    bitstream_skip(&s->bc, err);
 
     /* get decoding parameters from header info */
     s->bit_alloc_params.sr_code     = hdr.sr_code;

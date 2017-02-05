@@ -29,7 +29,6 @@ static int ac3_eac3_probe(AVProbeData *p, enum AVCodecID expected_codec_id)
     int max_frames, first_frames = 0, frames;
     uint8_t *buf, *buf2, *end;
     AC3HeaderInfo hdr;
-    BitstreamContext bc;
     enum AVCodecID codec_id = AV_CODEC_ID_AC3;
 
     max_frames = 0;
@@ -40,8 +39,7 @@ static int ac3_eac3_probe(AVProbeData *p, enum AVCodecID expected_codec_id)
         buf2 = buf;
 
         for(frames = 0; buf2 < end; frames++) {
-            bitstream_init(&bc, buf2, 54);
-            if (avpriv_ac3_parse_header(&bc, &hdr) < 0)
+            if (avpriv_ac3_parse_header(buf2, 54, &hdr) < 0)
                 break;
             if(buf2 + hdr.frame_size > end ||
                av_crc(av_crc_get_table(AV_CRC_16_ANSI), 0, buf2 + 2, hdr.frame_size - 2))
